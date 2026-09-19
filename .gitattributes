@@ -1,0 +1,15 @@
+# The memory bank is a record: append a file, never edit a shared one. That rule is
+# what keeps it out of every pull request's conflict list, and these two lines are the
+# safety net for the one file the rule cannot cover.
+#
+# `merge=union` takes BOTH sides of a conflicting hunk instead of stopping. It is right
+# here and wrong almost everywhere else: it is only safe for a file whose lines are
+# unordered, independent, and meaningless in combination with their neighbours. An index
+# of one-line-per-record is exactly that. A config file, a lockfile or anything with
+# syntax is not - union would happily produce a file that parses as neither side.
+#
+# The cost is that a genuine edit to the SAME line on both sides silently keeps both
+# copies rather than asking. For an index that means one duplicated row, visible in the
+# next `rk memory find` and fixed by deleting a line. That is the trade, taken knowingly.
+memory-bank/index.md      merge=union
+memory-bank/decisions/*   merge=union
