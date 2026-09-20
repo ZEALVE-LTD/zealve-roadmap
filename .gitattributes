@@ -1,5 +1,5 @@
 # The memory bank is a record: append a file, never edit a shared one. That rule is
-# what keeps it out of every pull request's conflict list, and these two lines are the
+# what keeps it out of every pull request's conflict list, and this line is the
 # safety net for the one file the rule cannot cover.
 #
 # `merge=union` takes BOTH sides of a conflicting hunk instead of stopping. It is right
@@ -9,7 +9,22 @@
 # syntax is not - union would happily produce a file that parses as neither side.
 #
 # The cost is that a genuine edit to the SAME line on both sides silently keeps both
-# copies rather than asking. For an index that means one duplicated row, visible in the
-# next `rk memory find` and fixed by deleting a line. That is the trade, taken knowingly.
+# copies rather than asking. For an index that means one duplicated row, fixed by
+# deleting a line - and found by reading the file, not by running `rk memory find`,
+# which searches the live bank under the state root and never opens this copy. That
+# is the trade, taken knowingly.
+#
+# `memory-bank/decisions/*` is deliberately NOT listed here, and the omission is the
+# considered half of this file. A decision record is prose with structure - headings,
+# a stated decision, its consequences - so it fails union's precondition outright.
+# Where the one-file-per-record rule holds, two records never touch the same path, the
+# attribute never fires, and it is inert. Where the rule breaks - two records taking
+# the same date and the same slug, or a later edit to one - it fires, and it resolves
+# the collision CLEAN at exit 0 by concatenating both documents: a record asserting
+# "capped at 3" and one asserting "unbounded" become a single file asserting both,
+# under one `## Decision` heading, with nothing to say it happened. Without the
+# attribute git stops with `CONFLICT (add/add)` and a human picks. So the line is
+# worthless in every case it was argued for and destructive in the only case it acts,
+# and a record that cannot be trusted to say what was decided is worth less than a
+# conflict somebody has to resolve.
 memory-bank/index.md      merge=union
-memory-bank/decisions/*   merge=union
